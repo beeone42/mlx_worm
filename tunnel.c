@@ -6,9 +6,9 @@
 #include <mlx.h>
 #include <mlx_int.h>
 
-#define WIN_X   1200
-#define	WIN_Y	 800
-#define WIN_TITLE "tunnel"
+#define WIN_X	     1200
+#define	WIN_Y	     800
+#define WIN_TITLE    "tunnel"
 
 #define SHAPE_SIZE   120
 #define SHAPE_THICK  30
@@ -178,13 +178,25 @@ int loop(void *param)
   if (i >= 255)
     i = 1;
 
-  x = round((sin(a*M_PI/200) * cos((a + 90)*M_PI/130)) * WIN_SIZE_X) + (WIN_CENTER_X);
-  y = round((sin(a*M_PI/180) * cos((a + 45)*M_PI/250)) * WIN_SIZE_Y) + (WIN_CENTER_Y);
+  // random
+  //  x = round((sin(a*M_PI/200) * cos((a + 90)*M_PI/130)) * WIN_SIZE_X) + (WIN_CENTER_X);
+  //  y = round((sin(a*M_PI/180) * cos((a + 45)*M_PI/250)) * WIN_SIZE_Y) + (WIN_CENTER_Y);
+
+  // rolling
+  //  x = round((sin(a*M_PI/200) * cos((a + 90)*M_PI/130)) * WIN_SIZE_X) + (WIN_CENTER_X);
+  //  y = round((sin(a*M_PI/180) * cos((a + 45)*M_PI/150)) * WIN_SIZE_Y) + (WIN_CENTER_Y);
+  
+  // fill
+  //  x = round((sin(a*M_PI/130) * cos((a + 90)*M_PI/200)) * WIN_SIZE_X) + (WIN_CENTER_X);
+  //  y = round((sin(a*M_PI/180) * cos((a + 45)*M_PI/210)) * WIN_SIZE_Y) + (WIN_CENTER_Y);
+
+  // up n down
+  x = round((sin(a*M_PI/130) * cos((a + 90)*M_PI/200)) * WIN_SIZE_X) + (WIN_CENTER_X);
+  y = round((sin(a*M_PI/180) * cos((a + 45)*M_PI/84)) * WIN_SIZE_Y) + (WIN_CENTER_Y);
   
   trace_circle_epais(x, y, SHAPE_SIZE, SHAPE_THICK, i);
-  if (i % 3 == 0)
-    blit(255 - i);
-  //usleep(10000);
+  if (i % 3 == 0)  // blit only every 3 frames
+    blit(255 - i); // roll palette in sync
   i++;
   a = a + 0.3;
 }
