@@ -1,0 +1,27 @@
+
+SRCS	= tunnel.c
+
+OBJS	= ${SRCS:.c=.o}
+
+NAME	= tunnel
+
+CFLAGS	= -I/usr/X11/include
+LDFLAGS	= -L/usr/X11/lib -lmlx -lX11 -lXext
+
+CC	= cc
+RM	= rm -f
+
+${NAME}:	${OBJS}
+		${CC} -o ${NAME} ${OBJS} ${LDFLAGS}
+
+all:		${NAME}
+
+clean:
+		${RM} ${OBJS}
+
+fclean:		clean
+		${RM} ${NAME}
+
+re:		fclean all
+
+.PHONY:		all clean fclean re
