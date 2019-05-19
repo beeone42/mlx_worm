@@ -6,7 +6,7 @@ OBJS	= ${SRCS:.c=.o}
 NAME	= tunnel
 
 CFLAGS	= -I/usr/X11/include
-LDFLAGS	= -L/usr/X11/lib -lmlx -lX11 -lXext
+LDFLAGS	= -L/usr/X11/lib -lm -lmlx -lX11 -lXext
 
 CC	= cc
 RM	= rm -f
