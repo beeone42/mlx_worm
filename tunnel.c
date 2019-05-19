@@ -10,7 +10,8 @@
 #define	WIN_Y	 800
 #define WIN_TITLE "tunnel"
 
-#define SHAPE_SIZE   100
+#define SHAPE_SIZE   120
+#define SHAPE_THICK  30
 #define WIN_MARGIN   20
 #define WIN_CENTER_X (WIN_X / 2)
 #define WIN_CENTER_Y (WIN_Y / 2)
@@ -149,30 +150,21 @@ void buf_pixel_put(int x, int y, int c)
   buf[x + (y*WIN_X)] = c;
 }
 
-void trace_carre(int X, int Y, int s, int c)
+void trace_circle(int x, int y, int s, int c)
 {
-  int x, y;
-
-  x = X - s/2;
-  y = Y - s/2;
-  for (int i = 0; i < s; i++)
+  for (double a = 0; a < 360; a++)
     {
-      // haut
-      buf_pixel_put(x + i, y, (c % 256));
-      // gauche
-      buf_pixel_put(x, y + i, (c % 256));
-      // bas
-      buf_pixel_put(x + i, y + s - 1, (c % 256));
-      // droit
-      buf_pixel_put(x + s - 1, y + i, (c % 256));
+      buf_pixel_put(x + ((s/2) * cos(a*M_PI/180)),
+		    y + ((s/2) * sin(a*M_PI/180)),
+		    (c % 256));
     }
 }
 
-void trace_carre_epais(int x, int y, int s, int e, int c)
+void trace_circle_epais(int x, int y, int s, int e, int c)
 {
   for (int i = 0; i < e; i++)
     {
-      trace_carre(x, y, s - i, c);
+      trace_circle(x, y, s - i, c);
     }
 }
 
@@ -189,17 +181,18 @@ int loop(void *param)
   x = round((sin(a*M_PI/200) * cos((a + 90)*M_PI/130)) * WIN_SIZE_X) + (WIN_CENTER_X);
   y = round((sin(a*M_PI/180) * cos((a + 45)*M_PI/250)) * WIN_SIZE_Y) + (WIN_CENTER_Y);
   
-  trace_carre_epais(x, y, SHAPE_SIZE, 20, i);
-  blit(255 - i);
+  trace_circle_epais(x, y, SHAPE_SIZE, SHAPE_THICK, i);
+  if (i % 3 == 0)
+    blit(255 - i);
   //usleep(10000);
   i++;
-  a = a + 0.5;
+  a = a + 0.3;
 }
 
 int main(void)
 {
-  int		i;
-  int		res;
+  int	i;
+  int	res;
   
   res = init();
   if (res != 0)
