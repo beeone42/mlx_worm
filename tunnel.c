@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <mlx.h>
 
 #define WIN_X	640
@@ -49,19 +50,18 @@ unsigned int	palette(int i)
 	  pal[i].b);
 }
 
-void	trace_ligne(int x, int c)
+void trace_carre(int x, int y, int s, int c)
 {
-  for (int y = 0; y < 50; y++)
+  for (int i = 0; i < s; i++)
     {
-      mlx_pixel_put(mlx, win, x, y, palette(c));
-    }
-}
-
-void trace_serpent(int deca)
-{
-  for (int x = 0; x < deca; x++)
-    {
-      trace_ligne(x, x + deca);
+      // haut
+      mlx_pixel_put(mlx, win, x + i, y, palette(c % 256));
+      // gauche
+      mlx_pixel_put(mlx, win, x, y + i, palette(c % 256));
+      // bas
+      mlx_pixel_put(mlx, win, x + i, y + s, palette(c % 256));
+      // droit
+      mlx_pixel_put(mlx, win, x + s, y + i, palette(c % 256));
     }
 }
 
@@ -126,11 +126,13 @@ int main(void)
 
     }
   
-  for (int x = 0; x < WIN_X; x++)
+  for (i = 0; i < 256; i++)
     {
-      trace_serpent(x, x % 256);
+      trace_carre((random() % (WIN_X - 50)),
+		  (random() % (WIN_Y - 50)),
+		  50, i);
+      usleep(100000);
     }
-
   mlx_key_hook(win, key_win, 0);
   mlx_loop(mlx);
 
