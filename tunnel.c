@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <mlx.h>
+#include <mlx_int.h>
 
 #define WIN_X	640
 #define	WIN_Y	480
@@ -17,9 +18,13 @@ typedef struct    col_s
 
 void		*mlx;
 void		*win;
+void		*img;
+char		*data;
 unsigned char	buf[WIN_X * WIN_Y];
 col_t		pal[256];
-
+int		bpp;
+int		sl;
+int		endian;
 
 
 int	init()
@@ -28,6 +33,18 @@ int	init()
     return (EXIT_FAILURE);
   if ((win = mlx_new_window(mlx, WIN_X, WIN_Y, WIN_TITLE)) == NULL)
     return (EXIT_FAILURE);
+
+  if (!(img = mlx_new_image(mlx, WIN_X, WIN_Y)))
+    return (EXIT_FAILURE);
+  data = mlx_get_data_addr(img, &bpp, &sl, &endian);
+  printf("OK (bpp1: %d, sizeline1: %d endian: %d type: %d)\n",
+	 bpp, sl, endian, ((t_img *)img)->type);
+
+  //  mlx_put_image_to_window(mlx,win1,im1,20,20);
+  
+
+
+
   return (0);
 }
 
@@ -43,11 +60,25 @@ void print_pal(int i)
   printf("%d: %d %d %d\n", i, pal[i].r, pal[i].g, pal[i].b);
 }
 
-unsigned int	palette(int i)
+void blit(int deca)
 {
-  return (pal[i].r * 256 * 256 +
-	  pal[i].g * 256 +
-	  pal[i].b);
+  int		a, i;
+  unsigned char	c;
+
+  for (i = 0; i < (WIN_X * WIN_Y); i++)
+    {
+      c = buf[i] ? (buf[i] + deca) % 256 : 0;
+      a = i << 2;
+      data[a]   = pal[c].b;
+      data[a+1] = pal[c].g;
+      data[a+2] = pal[c].r;
+    }
+  mlx_put_image_to_window(mlx, win, img, 0, 0);
+}
+
+void buf_pixel_put(int x, int y, int c)
+{
+  buf[x + (y*WIN_X)] = c;
 }
 
 void trace_carre(int x, int y, int s, int c)
@@ -55,13 +86,21 @@ void trace_carre(int x, int y, int s, int c)
   for (int i = 0; i < s; i++)
     {
       // haut
-      mlx_pixel_put(mlx, win, x + i, y, palette(c % 256));
+      buf_pixel_put(x + i, y, (c % 256));
       // gauche
-      mlx_pixel_put(mlx, win, x, y + i, palette(c % 256));
+      buf_pixel_put(x, y + i, (c % 256));
       // bas
-      mlx_pixel_put(mlx, win, x + i, y + s, palette(c % 256));
+      buf_pixel_put(x + i, y + s - 1, (c % 256));
       // droit
-      mlx_pixel_put(mlx, win, x + s, y + i, palette(c % 256));
+      buf_pixel_put(x + s - 1, y + i, (c % 256));
+    }
+}
+
+void trace_carre_epais(int x, int y, int s, int e, int c)
+{
+  for (int i = 0; i < e; i++)
+    {
+      trace_carre(x + i, y + i, s - (i * 2), c);
     }
 }
 
@@ -122,16 +161,22 @@ int main(void)
       pal[i + 224].r = 0;
       pal[i + 224].g = 255 - (i * 8);
       pal[i + 224].b = 255;
-
-
     }
+
+  // noir
+  
+  pal[0].r = 0;
+  pal[0].g = 0;
+  pal[0].b = 0;
+  
+  trace_carre_epais(50, 300, 50, 10, 128);
   
   for (i = 0; i < 256; i++)
     {
-      trace_carre((random() % (WIN_X - 50)),
-		  (random() % (WIN_Y - 50)),
-		  50, i);
-      usleep(100000);
+      trace_carre_epais(i * 2, i,
+			50, 4, i);
+      blit(255 - i);
+      usleep(10000);
     }
   mlx_key_hook(win, key_win, 0);
   mlx_loop(mlx);
