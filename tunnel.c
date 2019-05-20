@@ -8,6 +8,8 @@
 #endif
 #include <mlx.h>
 
+#define CLICK_TO_START 0
+
 #ifndef DestroyNotify
 # define DestroyNotify 17
 #endif
@@ -41,13 +43,14 @@ void		*img;
 char		*data;
 unsigned char	buf[WIN_X * WIN_Y];
 col_t		pal[256];
-int		bpp;
-int		sl;
-int		endian;
-
+static int      first = 1;
 
 int	init()
 {
+  int	bpp;
+  int	sl;
+  int	endian;
+
   if ((mlx = mlx_init()) == NULL)
     return (EXIT_FAILURE);
   if ((win = mlx_new_window(mlx, WIN_X, WIN_Y, WIN_TITLE)) == NULL)
@@ -68,6 +71,7 @@ int	close_win(void *p)
 
 int	mouse_win(int button, int x, int y, void *p)
 {
+  first = 0;
   printf("Mouse in Win, button %d at %dx%d.\n", button, x, y);
   return (0);
 }
@@ -198,6 +202,9 @@ int loop(void *param)
   static double	a = 0;
   int		x;
   int		y;
+
+  if (CLICK_TO_START && (first == 1))
+    return (0);
 
   if (i >= 255)
     i = 1;
