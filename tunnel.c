@@ -3,8 +3,18 @@
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
+#ifdef OSX
+# include <OpenGL/gl.h>
+#endif
 #include <mlx.h>
-#include <mlx_int.h>
+
+#ifndef DestroyNotify
+# define DestroyNotify 17
+#endif
+
+#ifndef StructureNotifyMask
+# define StructureNotifyMask (1L<<17)
+#endif
 
 #define WIN_X	     1200
 #define	WIN_Y	     800
@@ -46,16 +56,30 @@ int	init()
   if (!(img = mlx_new_image(mlx, WIN_X, WIN_Y)))
     return (EXIT_FAILURE);
   data = mlx_get_data_addr(img, &bpp, &sl, &endian);
-  printf("OK (bpp1: %d, sizeline1: %d endian: %d type: %d)\n",
-	 bpp, sl, endian, ((t_img *)img)->type);
+  return (0);
+}
+
+int	close_win(void *p)
+{
+  printf("Goodbye\n");
+  exit(0);
+  return (0);
+}
+
+int	mouse_win(int button, int x, int y, void *p)
+{
+  printf("Mouse in Win, button %d at %dx%d.\n", button, x, y);
   return (0);
 }
 
 int	key_win(int key, void *p)
 {
   printf("Key in Win : %d\n",key);
-  if (key==0xFF1B)
+  if (key==0xFF1B) // linux
     exit(0);
+  if (key==53) // MacOsX
+    exit(0);
+  return (0);
 }
 
 void init_pal()
@@ -199,6 +223,7 @@ int loop(void *param)
     blit(255 - i); // roll palette in sync
   i++;
   a = a + 0.3;
+  return (0);
 }
 
 int main(void)
@@ -212,7 +237,9 @@ int main(void)
   
   init_pal();
   
+  mlx_mouse_hook(win, mouse_win, 0);
   mlx_key_hook(win, key_win, 0);
+  mlx_hook(win, DestroyNotify, StructureNotifyMask, close_win, 0);
   mlx_loop_hook(mlx, loop, NULL);
   mlx_loop(mlx);
 
